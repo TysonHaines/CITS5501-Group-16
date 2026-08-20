@@ -52,7 +52,7 @@ Our project is hosted on GitHub, in a private repository at: [github.com/TysonHa
 - Commit messages should be kept clear, and be detailed enough such that any member can understand the changes made. It should also reference the relevant issue number where applicable (e.g. `Fixes #12`). 
 - CI checks (tests, linting, type-checking) must pass before a PR can be merged.
 
-Our group name will be: 404 Brain Not Found
+Our group name will be: 404 Brain Not Found.
 
 ## 3.3. Resource Risk Management
 
@@ -73,7 +73,7 @@ The main resourcing risk we anticipate is a group member becoming unavailable (e
 
 The Collaboration & Workflow Plan will be maintained in our GitHub repository at [github.com/TysonHaines/CITS5501-Group-16](https://github.com/TysonHaines/CITS5501-Group-16), so it is version-controlled alongside the rest of our project, in case of any changes to the document.
 
-Additionally, there will be a copy of this pinned within the Teams chat,
+Additionally, there will be a copy of this plan pinned within the Teams chat.
 
 2. **What tool or approach are you using to track assigned tasks and completion? Why did you choose it? Has anyone in the group used it before?**
 
@@ -118,7 +118,7 @@ Our group decided to choose this tool because it is specified as an installed pa
 The most fragile parts are likely to be: 
 
 - The HTTP layer (timeouts, connection resets, unexpected status codes such as 429/503 from rate limiting).
-- HTML parsing (the site's markup structure changing, or pages varying slightly between documents so that a selector that works on one page fails on another)
+- HTML parsing (the site's markup structure changing, or pages varying slightly between documents so that a selector that works on one page fails on another).
 - Document parsing (PDF, Word, and RTF files that are malformed, password protected, or use encodings our parser doesn't expect). 
 - Redirects and broken links are also an easy source of failure, since a scraper that assumes every link resolves to a valid document will break the moment one doesn't.
 - Client-side rendering is another likely failure point: if the library (or parts of it, e.g. a document list, pagination, or a "load more" button) is rendered or populated by JavaScript after the initial page load, a scraper that only fetches and parses the raw HTML response will simply not see that content - it never runs the script that would have inserted it. The same applies to content that only appears after a user action, such as expanding an accordion, switching a tab, or scrolling to trigger infinite loading. Since the raw response still returns a valid 200 status with a well-formed (if incomplete) page, and since the scraper won't error, it will just silently return less data than expected.
