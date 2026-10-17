@@ -30,14 +30,11 @@ Run with:
 import argparse
 import sys
 import time
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
 
-# added imports
-import os
-from pathlib import Path
 
 START_URL = "https://uwa-policy.cits5501.arranstewart.io/policy/"
 
@@ -51,7 +48,6 @@ DELAY_SECONDS = 1.0     # pause between consecutive requests
 USER_AGENT = "CITS5501-student-scraper/0.1 (university course project)"
 
 FILE_EXTENSION = ('.pdf', '.doc', '.docx', '.pptx')
-DISTINCT_DOCS = {}
 
 class RequestLimitExceeded(Exception):
     """Raised when a run tries to make more than MAX_REQUESTS requests."""
@@ -105,13 +101,7 @@ def is_policy_link(url):
     """
     # this does not account for other possible file extensions unmentiones
     # along with any other links related to the policy
-    global DISTINCT_DOCS
-    for extension in FILE_EXTENSION:
-        DISTINCT_DOCS.setdefault(extension, [])
-        if url.endswith(extension):
-            DISTINCT_DOCS[extension].append(url)
-            return True
-    return False
+    return urlparse(url).path.lower().endswith(FILE_EXTENSION)
 
 
 
@@ -125,44 +115,30 @@ def describe_download(session, url):
 
     TODO: implement this, using `fetch()` to make the request.
     """
-    proj_dir = "policy_downloads"
-    print("Attempting download...")
-    # get tye current project directory path
-    proj_dir_path = Path(__file__).parent.absolute()
-    # create the target destination directory
-    dest_dir = proj_dir_path / proj_dir
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    # extract the original filename from the url
-    filename = url.split("/")[-1]
-    file_path = dest_dir / filename
+    try:
+        response = fetch(session,url)
+    except requests.RequestsException as error:
+        print(f"Failed to fetch '{url}': {error}\n")
+        return
+    body = response.content
 
-    print(f"downloading '{filename}' to: {file_path}")
+    print("==========METADATA==========")
+    # url of policy
+    print(f"URL: \n{url}\n")
+    # HTTP status
+    print(f"HTTP status and reason: \n{response.status_code}  {response.reason}\n")
+    # declared content-type
+    print(f"Content-Type: \n{response.headers.get('Content-Type')}\n")
+    # downloaded size
+    total_bytes = 0
+    downloaded_size_bytes = len(body)
+    downloaded_size_mb = int(downloaded_size_bytes) / (1024 * 1024)
+    print(f"Downloaded Size: \n{downloaded_size_bytes} ({downloaded_size_mb:.2f} MB)\n")\
 
-    # stream and write the file in binary mode
-    with fetch(session, url) as response:
-        response.raise_for_status() # check for HTTP errors
-        print("==========METADATA==========")
-        # url of policy
-        print(f"URL: \n{url}\n")
-        # HTTP status
-        print(f"HTTP status and reason: \n{response.status_code}  {response.reason}\n")
-        # declared content-type
-        print(f"Content-Type: \n{response.headers.get('Content-Type')}\n")
-        # downloaded size
-        file_size_bytes = response.headers.get('Content-Length')
-        if file_size_bytes:
-            file_size_mb = int(file_size_bytes) / (1024 * 1024)
-            print(f"Downloaded Size (MB): \n{file_size_mb:.2f} MB\n")
-        else:
-            print("The server did not provide a Content-Length header.")
-        # (optional) initial bytes of the downloaded file
-        # --------------------still needs to be implemented!!!
-        print("============================")
-
-        with open(file_path, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-
+    # (optional) initial bytes of the downloaded file
+    initial_bytes = body[:16]
+    print(f"Initial Bytes: \n{initial_bytes}\n")
+    print("============================")
     print("DOWNLOAD COMPLETE\n\n\n")
 
 
@@ -203,9 +179,23 @@ def main():
 
     # TODO: choose 3-5 *distinct* policy links and call describe_download()
     # on each. Keep within MAX_REQUESTS (the index page already used one).
-    for distinct_doc in DISTINCT_DOCS.values():
-        doc = distinct_doc[0]
-        describe_download(session, doc)
+
+    unique_policy_links = list(dict.fromkeys(policy_links))
+    # select up to 5 distinct documents
+    selected_docs = unique_policy_links[:5]
+    print(f"Selected {len(selected_docs)} distinct documents:\n")
+    for doc in selected_docs:
+        try:
+            describe_download(session, doc)
+        except requests.RequestException as error:
+            print(f"Failed to download '{doc}': {error}\n")
+        except OSError as error:
+            print(f"File error for '{doc}': {error}\n")
+
+
+    # for distinct_doc in DISTINCT_DOCS.values():
+    #     doc = distinct_doc[0]
+    #     describe_download(session, doc)
 
     print(f"Requests made: {_request_count} (limit {MAX_REQUESTS})")
     return 0
