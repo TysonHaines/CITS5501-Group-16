@@ -44,8 +44,7 @@ MAX_REQUESTS = 20       # total requests per run (index page + downloads)
 TIMEOUT_SECONDS = 10    # per request; `requests` has NO timeout by default
 DELAY_SECONDS = 1.0     # pause between consecutive requests
 
-# You may want to add your team number here
-USER_AGENT = "CITS5501-student-scraper/0.1 (university course project)"
+USER_AGENT = "CITS5501-Group16-scraper/0.1 (university course project)"
 
 FILE_EXTENSION = ('.pdf', '.doc', '.docx', '.pptx')
 
@@ -99,7 +98,7 @@ def is_policy_link(url):
     TODO: implement this. Filtering by file extension is acceptable for
     the prototype -- but note its limitations in your report.
     """
-    # this does not account for other possible file extensions unmentiones
+    # this does not account for other possible file extensions unmentioned
     # along with any other links related to the policy
     return urlparse(url).path.lower().endswith(FILE_EXTENSION)
 
@@ -120,6 +119,7 @@ def describe_download(session, url):
     except requests.RequestsException as error:
         print(f"Failed to fetch '{url}': {error}\n")
         return
+
     body = response.content
 
     print("==========METADATA==========")
@@ -134,13 +134,10 @@ def describe_download(session, url):
     downloaded_size_bytes = len(body)
     downloaded_size_mb = int(downloaded_size_bytes) / (1024 * 1024)
     print(f"Downloaded Size: \n{downloaded_size_bytes} ({downloaded_size_mb:.2f} MB)\n")\
-
-    # (optional) initial bytes of the downloaded file
+    # initial bytes of the downloaded file
     initial_bytes = body[:16]
     print(f"Initial Bytes: \n{initial_bytes}\n")
     print("============================")
-    print("DOWNLOAD COMPLETE\n\n\n")
-
 
 
 
@@ -171,8 +168,7 @@ def main():
     links = extract_links(response.text, response.url)
     print(f"Found {len(links)} links:")
     for link in links:
-        # print(f"  {link}")
-        pass # makes loop do nothing for now until implementation is added
+        print(f"  {link}")
 
     policy_links = [link for link in links if is_policy_link(link)]
     print(f"{len(policy_links)} of these look like policy documents.")
@@ -191,11 +187,6 @@ def main():
             print(f"Failed to download '{doc}': {error}\n")
         except OSError as error:
             print(f"File error for '{doc}': {error}\n")
-
-
-    # for distinct_doc in DISTINCT_DOCS.values():
-    #     doc = distinct_doc[0]
-    #     describe_download(session, doc)
 
     print(f"Requests made: {_request_count} (limit {MAX_REQUESTS})")
     return 0
