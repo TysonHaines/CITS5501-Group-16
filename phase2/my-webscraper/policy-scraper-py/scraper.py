@@ -44,7 +44,7 @@ TIMEOUT_SECONDS = 10    # per request; `requests` has NO timeout by default
 DELAY_SECONDS = 1.0     # pause between consecutive requests
 
 # You may want to add your team number here
-USER_AGENT = "CITS5501-student-scraper/0.1 (university course project)"
+USER_AGENT = "CITS5501-Group16-scraper/0.1 (university course project)"
 
 class RequestLimitExceeded(Exception):
     """Raised when a run tries to make more than MAX_REQUESTS requests."""
