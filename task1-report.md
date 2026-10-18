@@ -15,12 +15,16 @@ With the default selection of five documents, the normal workflow requires one i
 These controls reduce the load placed on the website but they have limits. The timeout does not impose a ten-second deadline in the entire download. In addition, redirects followed automatically by requests can generate additional HTTP requests within a single fetch(). Those redirect requests are not individually counted or delayed by the wrapper. 
 
 1.3	Assumptions
+
 A1 - Directly available links. 
 Policy documents are accessible through links in the index page’s initial HTML response. Recursive crawling and JavaScript execution are outside the prototype’s scope.
+
 A2 - Extension-based identification. 
 A recognised URL extension is sufficient to identify a potential policy document. This is a discovery heuristic, not proof that the response contains a usable document.
+
 A3 - URL-based distinctness. 
 Resolved URLs are treated as distinct after removing fragments. The prototype does not compare document contents to identify identical files served under different URLs.
+
 A4 - Small demonstration sample. 
 Selecting the first five candidate URLs is sufficient to demonstrate discovery and downloading; the prototype is not intended to retrieve the entire policy collection.
 
