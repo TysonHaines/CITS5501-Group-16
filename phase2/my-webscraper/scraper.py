@@ -30,7 +30,7 @@ Run with:
 import argparse
 import sys
 import time
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urldefrag
 
 import requests
 from bs4 import BeautifulSoup
@@ -46,7 +46,10 @@ DELAY_SECONDS = 1.0     # pause between consecutive requests
 
 USER_AGENT = "CITS5501-Group16-scraper/0.1 (university course project)"
 
-FILE_EXTENSION = ('.pdf', '.doc', '.docx', '.pptx')
+FILE_EXTENSIONS = ('.pdf', '.doc', '.docx', '.pptx')
+INITIAL_BYTES_SIZE = 16
+CHUNK_SIZE = 8192
+MAX_DOCS = 5
 
 class RequestLimitExceeded(Exception):
     """Raised when a run tries to make more than MAX_REQUESTS requests."""
@@ -100,7 +103,7 @@ def is_policy_link(url):
     """
     # this does not account for other possible file extensions unmentioned
     # along with any other links related to the policy
-    return urlparse(url).path.lower().endswith(FILE_EXTENSION)
+    return urlparse(url).path.lower().endswith(FILE_EXTENSIONS)
 
 
 
@@ -114,30 +117,46 @@ def describe_download(session, url):
 
     TODO: implement this, using `fetch()` to make the request.
     """
-    try:
-        response = fetch(session,url)
-    except requests.RequestsException as error:
-        print(f"Failed to fetch '{url}': {error}\n")
-        return
-
-    body = response.content
-
     print("==========METADATA==========")
     # url of policy
     print(f"URL: \n{url}\n")
+
+    try:
+        response = fetch(session, url, stream=True)
+    except requests.RequestException as error:
+        print(f"Outcome: FAILED (request error: {error})")
+        print("============================")
+        return False
+
+    body = response.content
+
+    downloaded_size_bytes = 0
+    initial_bytes = b""
+    try:
+        with response:
+            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                if len(initial_bytes) < INITIAL_BYTES_SIZE:
+                    initial_bytes += chunk[:INITIAL_BYTES_SIZE - len(initial_bytes)]
+                downloaded_size_bytes += len(chunk)
+    except requests.RequestException as error:
+        print(f"HTTP status: {response.status_code} {response.reason}")
+        print(f"Outcome: FAILED (error while reading body: {error})")
+        print("============================")
+        return False
+
+
     # HTTP status
     print(f"HTTP status and reason: \n{response.status_code}  {response.reason}\n")
     # declared content-type
     print(f"Content-Type: \n{response.headers.get('Content-Type')}\n")
     # downloaded size
-    total_bytes = 0
-    downloaded_size_bytes = len(body)
-    downloaded_size_mb = int(downloaded_size_bytes) / (1024 * 1024)
-    print(f"Downloaded Size: \n{downloaded_size_bytes} ({downloaded_size_mb:.2f} MB)\n")\
+    downloaded_size_mb = downloaded_size_bytes / (1024 * 1024)
+    print(f"Downloaded Size: \n{downloaded_size_bytes} ({downloaded_size_mb:.2f} MB)\n")
     # initial bytes of the downloaded file
     initial_bytes = body[:16]
     print(f"Initial Bytes: \n{initial_bytes}\n")
     print("============================")
+    return True
 
 
 
@@ -176,20 +195,26 @@ def main():
     # TODO: choose 3-5 *distinct* policy links and call describe_download()
     # on each. Keep within MAX_REQUESTS (the index page already used one).
 
-    unique_policy_links = list(dict.fromkeys(policy_links))
-    # select up to 5 distinct documents
-    selected_docs = unique_policy_links[:5]
+    unique_policy_links = list(
+        dict.fromkeys(urldefrag(link)[0] for link in policy_links)
+    )
+    selected_docs = unique_policy_links[:MAX_DOCS]
     print(f"Selected {len(selected_docs)} distinct documents:\n")
+ 
+    succeeded = 0
+    attempted = 0
     for doc in selected_docs:
         try:
-            describe_download(session, doc)
-        except requests.RequestException as error:
-            print(f"Failed to download '{doc}': {error}\n")
-        except OSError as error:
-            print(f"File error for '{doc}': {error}\n")
-
+            attempted += 1
+            if describe_download(session, doc):
+                succeeded += 1
+        except RequestLimitExceeded as error:
+            print(f"Stopping: {error}")
+            break
+ 
+    print(f"Downloads succeeded: {succeeded} of {attempted} attempted")
     print(f"Requests made: {_request_count} (limit {MAX_REQUESTS})")
-    return 0
+    return 0 if succeeded > 0 else 1
 
 
 if __name__ == "__main__":
