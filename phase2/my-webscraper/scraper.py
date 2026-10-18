@@ -128,8 +128,6 @@ def describe_download(session, url):
         print("============================")
         return False
 
-    body = response.content
-
     downloaded_size_bytes = 0
     initial_bytes = b""
     try:
@@ -153,7 +151,6 @@ def describe_download(session, url):
     downloaded_size_mb = downloaded_size_bytes / (1024 * 1024)
     print(f"Downloaded Size: \n{downloaded_size_bytes} ({downloaded_size_mb:.2f} MB)\n")
     # initial bytes of the downloaded file
-    initial_bytes = body[:16]
     print(f"Initial Bytes: \n{initial_bytes}\n")
     print("============================")
     return True
