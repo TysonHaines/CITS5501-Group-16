@@ -1,121 +1,120 @@
-### CITS5501 Project Phase 2 - Task 1 Prototype
-`This is a minimal prototype, which has the objective of identifying and 'downloading' policy documents from the 'UWA Policy Library index page'. To
-show that the scraper has achieved this, useful prints to the console are
-used. Which outline the current progress of the scraper for retrieving policy documents, and metadata including: the policy document's url, HTTP status and reason of the request made for this action, declared content-type of the document, the downloaded size, and the initial bytes of the downloaded file.`
+# CITS5501 Project Phase 2 – Task 1 Prototype
 
-Group Number: 16
-Group Name: '404 Brain Not Found'
-Group Members:
-                        Tyson Haines       (23779585)
-                        Akshay Raghuwanshi (24991278)
-                        Celine Xu          (24714078)
-                        Kevin Tan          (23789621)
-                        Khushi Sesetti     (23823678)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Status](https://img.shields.io/badge/status-prototype-orange)
 
+A minimal prototype whose objective is to **identify and "download" policy documents** from the UWA Policy Library index page.
 
-# What our scraper does?
-  1. fetches the index page at:
-            `https://uwa-policy.cits5501.arranstewart.io/policy/`
+To demonstrate that the scraper works, it prints useful progress information to the console, including each policy document's:
 
-  2. extracts every '<a href>' link and resolves it to an absolute url.
+- URL
+- HTTP status and reason
+- Declared `Content-Type`
+- Downloaded size
+- Initial bytes of the downloaded file
 
-  3. Keeps any link that is recognised as a policy document using the
-     file extension expressed in the url.
+---
 
-  4. Removes any duplicate links and selects the first '5' distinct documents.
-     Note: You can increase the number of distinct documents by increasing the
-           'MAX_DOCS' variable. However, this scraper was built with the
-           intention of a smaller request of downloads out of respect for site.
+## Group Details
 
-  5. Downloads each distinct document that was selected via stream (not saved
-     to disk). Additionally, a console print displays the:
+**Group Number:** 16
+**Group Name:** 404 Brain Not Found
 
-     -URL of the policy document
-     -HTTP status and reason
-     -Declared Content-Type
-     -Downloaded Size
-     -First 16 Bytes of the file
-     -Outcome of the download: 'SUCCESS' or 'FAILED'
+| Member             | Student ID |
+|--------------------|------------|
+| Tyson Haines       | 23779585   |
+| Akshay Raghuwanshi | 24991278   |
+| Celine Xu          | 24714078   |
+| Kevin Tan          | 23789621   |
+| Khushi Sesetti     | 23823678   |
 
+---
 
+## What Our Scraper Does
 
-# What are the Requirements to run our Scraper?
-    - have at least Python 3.8 or later installed
+1. **Fetches the index page** at:
+   `https://uwa-policy.cits5501.arranstewart.io/policy/`
+2. **Extracts every `<a href>` link** and resolves it to an absolute URL.
+3. **Filters for policy documents**, keeping any link recognised as a document by the file extension in its URL.
+4. **Removes duplicates** and selects the first **5** distinct documents.
+5. **Downloads each selected document via stream** (nothing is saved to disk) and prints the following to the console:
 
-    - use the packages already provided in our 'requirements.txt'.
-      This is to ensure the dependencies and their respective versioning
-      for this scraper are configured and installed appropriately.
+   - URL of the policy document
+   - HTTP status and reason
+   - Declared `Content-Type`
+   - Downloaded size
+   - First 16 bytes of the file
+   - Outcome of the download: `SUCCESS` or `FAILED`
 
-    * Network Access to the Policy site. Access to the site this scraper
-      has been built for may be restricted based on the network you have
-      access to. To use this scraper, you must either have access to the
-      UWA Policy Library index page or at least a local copy of it.
+> [!NOTE]
+> You can increase the number of documents by raising the `MAX_DOCS` variable. However, this scraper was built to make a small number of requests out of respect for the site.
 
+---
 
-# How to Run
-  -  First retrieve our scraper script and other essential documents at
-     our public GitHub repository:
-              `https://github.com/TysonHaines/CITS5501-Group-16`
+## Requirements
 
-  #option 1
-  -  Using `uv`, run in the command:
-          `uv run --with-requirements requirements.txt scraper.py`
-      
-      -make sure `uv` is installed, and
-      -make sure your CLI accepts bash commands
+- **Python 3.8 or later**
+- **Packages listed in `requirements.txt`**, which ensures the dependencies and their versions are configured correctly.
+- **Network access to the policy site.** Access may be restricted depending on your network. You must either be able to reach the UWA Policy Library index page, or have a local copy of it.
 
-  #option 2
-  -  If you do not have `uv` you can run the following commands:
-          `python3 -m venv .venv
-          source .venv/bin/activate          # Windows: .venv\Scripts\activate
-          pip install -r requirements.txt
-          python3 scraper.py`
+---
 
-  - If you are using a local copy `e.g. at localhost:3000`, run with the
-    command:
-`uv run --with-requirements requirements.txt scraper.py http://localhost:3000/`
+## How to Run
 
+First, retrieve the scraper script and other essential files from our public GitHub repository:
 
+```bash
+git clone https://github.com/TysonHaines/CITS5501-Group-16.git
+cd CITS5501-Group-16
+```
 
+### Option 1: Using `uv`
 
-# Safety and Politeness Limits
-  As defined at the top of `scraper.py`, it is expected that users our scraper
-  act respectfully and without malicious intent. To adhere to this, we have 
-  limitation inducing variables:
+Make sure `uv` is installed and that your CLI accepts bash commands, then run:
 
-  `MAX_REQUESTS` at 20 requests maximum (index page + downloads). Which   
-  defines the total requests allowed for each program execution.
-  -since our prototype only makes at most 6 request (1 index page + 5 downloads)
-   the `MAX_DOCS` can be adjusted accordingly to make more requests within the
-   20 requests limit.
+```bash
+uv run --with-requirements requirements.txt scraper.py
+```
 
-  `TIMEOUT_SECONDS` at 10, as a timeout between each request made to the site
+### Option 2: Without `uv`
 
-  `DELAY_SECONDS` at 1.0, to create a pause between consecutive requests
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python3 scraper.py
+```
 
+### Using a local copy of the site
 
+If you are using a local copy (e.g. at `localhost:3000`), pass its URL as an argument:
 
-# Exit Codes
-  `As part of professional practice, It was decided that the execution of the
-  program should respond with appropriate exit codes for whether the program
-  executed accordingly.`
+```bash
+uv run --with-requirements requirements.txt scraper.py http://localhost:3000/
+```
 
-  Similar to C-style exit codes, we had:
-    0 - at least one document was downloaded successfully
-    1 - the index page could not be fetched, or no document downloaded
-        successfully
+---
 
+## Safety and Politeness Limits
 
+Users of this scraper are expected to act respectfully and without malicious intent. To support this, the following limits are defined at the top of `scraper.py`:
 
+| Variable          | Default | Description                                                              |
+|-------------------|---------|--------------------------------------------------------------------------|
+| `MAX_REQUESTS`    | `20`    | Maximum total requests per program execution (index page + downloads).   |
+| `TIMEOUT_SECONDS` | `10`    | Timeout for each request made to the site.                               |
+| `DELAY_SECONDS`   | `1.0`   | Pause between consecutive requests.                                      |
 
+> [!TIP]
+> The prototype makes at most 6 requests (1 index page + 5 downloads), so `MAX_DOCS` can be raised accordingly while staying within the `MAX_REQUESTS` limit of 20.
 
+---
 
+## Exit Codes
 
+As part of professional practice, the program returns appropriate exit codes to indicate whether it executed successfully. Similar to C-style exit codes:
 
-
-
-
-
-
-
-
+| Code | Meaning                                                                              |
+|------|--------------------------------------------------------------------------------------|
+| `0`  | At least one document was downloaded successfully.                                   |
+| `1`  | The index page could not be fetched, or no document was downloaded successfully.     |
