@@ -144,7 +144,8 @@ def describe_download(session, url):
 
 
     # HTTP status
-    if not response.ok:
+    successful = 200 <= response.status_code < 300
+    if not successful:
         print(f"Outcome: FAILED (HTTP {response.status_code})")
         return False
     print(f"HTTP status and reason: \n{response.status_code}  {response.reason}\n")
