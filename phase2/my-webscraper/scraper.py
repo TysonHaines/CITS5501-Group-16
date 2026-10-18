@@ -144,6 +144,9 @@ def describe_download(session, url):
 
 
     # HTTP status
+    if not response.ok:
+        print(f"Outcome: FAILED (HTTP {response.status_code})")
+        return False
     print(f"HTTP status and reason: \n{response.status_code}  {response.reason}\n")
     # declared content-type
     print(f"Content-Type: \n{response.headers.get('Content-Type')}\n")
@@ -152,6 +155,8 @@ def describe_download(session, url):
     print(f"Downloaded Size: \n{downloaded_size_bytes} ({downloaded_size_mb:.2f} MB)\n")
     # initial bytes of the downloaded file
     print(f"Initial Bytes: \n{initial_bytes}\n")
+
+    print(f"Outcome: SUCCESS")
     print("============================")
     return True
 
