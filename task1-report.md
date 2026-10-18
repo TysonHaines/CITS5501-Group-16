@@ -1,10 +1,13 @@
 Task 1 – Prototype
 
 1.1	Purpose and Implementation 
+
 Our minimal prototype identifies and attempts to download a small selection of policy documents linked from the supplied UWA Policy Library index page. (add more) 
 
 1.2	Request Controls
+
 All HTTP requests initiated explicity by scraper.py pass through a common fetch() function. 
+
 This applies:
 •	A group-specific User-Agent identifying the course project.
 •	A 10-second connection/read timeout. 
