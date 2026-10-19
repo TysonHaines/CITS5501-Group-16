@@ -36,14 +36,14 @@ For our implementation, we created a local HTTP server using Python's `http.serv
 
 The failure scenario occurs when the client requests `/policy/invalid-policy.pdf`. Although the URL ends in `.pdf`, the server deliberately returns HTTP 200 with a content type of `text/html`. The response contains an HTML message indicating that the document is unavailable, rather than an actual PDF.
 
-We chose this scenario because a scraper that only checks the URL extension and HTTP status could mistakenly treat the response as a successful PDF download.
+This scenario corresponds to **T008 (S5 – HTML returned for a PDF URL)** from Task 2. According to the test's acceptance criteria, a fully functional scraper should reject the response and report a content or format mismatch instead of accepting it as a valid PDF.
 
-The implementation consists of two Python files: `mock_server.py`, which provides the simulated website, and `test_mock_server.py`, which contains three automated tests using pytest. The tests check whether the index page contains the expected link, whether the PDF URL returns HTML instead of PDF content, and whether a simplified scraper incorrectly accepts the response. All three tests passed locally.
+Our implementation consists of two Python files: `mock_server.py`, which provides the simulated website, and `test_mock_server.py`, which contains three automated tests using pytest. These tests verify the index page, confirm that the PDF URL returns HTML, and demonstrate how a simplified scraper can incorrectly accept the response. All three tests passed locally.
 
-We also tested the group's Task 1 prototype against the mock server to see how it handled the same scenario. The scraper successfully identified the PDF link and downloaded the response. However, despite receiving 234 bytes of HTML with the content type `text/html`, it reported `Outcome: SUCCESS`. This confirmed that the prototype currently treats a successful HTTP response as a successful document download without validating the actual file format.
+We also tested the group's Task 1 prototype against the mock server. The scraper identified the PDF link and downloaded the response. However, despite receiving 234 bytes of HTML with the content type `text/html`, it reported `Outcome: SUCCESS`. This demonstrated that the prototype currently relies on the HTTP status to determine download success without validating the document format.
 
-This behaviour is a limitation rather than necessarily a failure to meet Task 1 requirements, since the prototype is only expected to provide basic downloading functionality and metadata.
+Under the acceptance criteria defined in T008, this behaviour would be considered a failure. However, it is a limitation of the current prototype rather than necessarily a violation of Task 1 requirements, since Task 1 focuses on basic document discovery, downloading and metadata reporting.
 
-Reproducing this scenario against the live website would be difficult because we cannot control the responses returned by its server. Using a local test double allowed us to reproduce the issue consistently without interfering with the actual website.
+Reproducing this scenario against the live website would be difficult because we cannot control the server's responses. Using a local test double allowed us to reproduce the issue consistently without interfering with the actual website.
 
-Overall, the demonstration shows why checking HTTP status codes alone is not sufficient to determine whether a downloaded policy document is valid.
+Overall, the demonstration highlights why a successful HTTP response does not necessarily mean that the downloaded document is valid.
