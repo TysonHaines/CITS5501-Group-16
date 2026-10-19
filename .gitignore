@@ -1,0 +1,21 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Pytest cache
+.pytest_cache/
+
+# Type checking cache
+.mypy_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Local environment configuration
+.env
+.env.*
