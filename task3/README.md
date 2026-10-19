@@ -130,23 +130,16 @@ First, start the mock server from the repository root:
 python task3/mock_server.py
 ```
 
-In another terminal, retrieve the Task 1 scraper from its Git branch:
+In another terminal, from the repository root, install the Task 1 dependencies:
 
 ```bash
-git fetch origin
-git show origin/task1/prototype:phase2/my-webscraper/scraper.py > /tmp/cits5501-task1-scraper.py
+uv pip install -r phase2/requirements.txt
 ```
 
-Ensure the required dependencies are installed:
+Run the scraper against the local mock server:
 
 ```bash
-uv pip install requests beautifulsoup4
-```
-
-Run the prototype against the local server:
-
-```bash
-python /tmp/cits5501-task1-scraper.py http://127.0.0.1:8000/policy/
+python phase2/scraper.py http://127.0.0.1:8000/policy/
 ```
 
 ### Observed Results
