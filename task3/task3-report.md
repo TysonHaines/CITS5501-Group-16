@@ -38,15 +38,12 @@ The failure scenario occurs when the client requests `/policy/invalid-policy.pdf
 
 We chose this scenario because a scraper that only checks the URL extension and HTTP status could mistakenly treat the response as a successful PDF download.
 
-The implementation consists of two Python files:
+The implementation consists of two Python files: `mock_server.py`, which provides the simulated website, and `test_mock_server.py`, which contains three automated tests using pytest. The tests check whether the index page contains the expected link, whether the PDF URL returns HTML instead of PDF content, and whether a simplified scraper incorrectly accepts the response. All three tests passed locally.
 
-* `mock_server.py` provides the simulated policy website and its responses.
-* `test_mock_server.py` contains three automated tests using pytest.
+We also tested the group's Task 1 prototype against the mock server to see how it handled the same scenario. The scraper successfully identified the PDF link and downloaded the response. However, despite receiving 234 bytes of HTML with the content type `text/html`, it reported `Outcome: SUCCESS`. This confirmed that the prototype currently treats a successful HTTP response as a successful document download without validating the actual file format.
 
-The first test checks that the policy index contains the expected PDF link. The second verifies that requesting the PDF returns HTML content rather than a PDF. The third demonstrates how a simplified scraper incorrectly accepts the response when it only checks the HTTP status and file extension.
+This behaviour is a limitation rather than necessarily a failure to meet Task 1 requirements, since the prototype is only expected to provide basic downloading functionality and metadata.
 
-All three tests passed when executed locally using Python 3.10.12 and pytest 9.1.1. The third test is deliberately designed to demonstrate incorrect acceptance, rather than successful document validation. It does not test the group's actual prototype.
+Reproducing this scenario against the live website would be difficult because we cannot control the responses returned by its server. Using a local test double allowed us to reproduce the issue consistently without interfering with the actual website.
 
-Reproducing this scenario against the live website would be difficult because we cannot control the content returned by its server. We would have to rely on the website unexpectedly returning an invalid document, which would make the test unreliable. Using a local test double allows us to reproduce the problem consistently without modifying or interfering with the actual website.
-
-Although this demonstration uses simplified validation logic, it highlights an important issue: a successful HTTP request does not necessarily mean that the downloaded content is a valid policy document.
+Overall, the demonstration shows why checking HTTP status codes alone is not sufficient to determine whether a downloaded policy document is valid.

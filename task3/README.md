@@ -117,3 +117,55 @@ HTML instead of a valid PDF on demand.
 Using a local test double provides a controlled, repeatable
 environment without modifying the real website or depending
 on external network conditions.
+## Integration Testing with Task 1
+
+We also tested the group's Task 1 prototype against the local
+mock server to demonstrate how it handles an invalid PDF response.
+
+### Running the Integration Test
+
+First, start the mock server from the repository root:
+
+```bash
+python task3/mock_server.py
+```
+
+In another terminal, retrieve the Task 1 scraper from its Git branch:
+
+```bash
+git fetch origin
+git show origin/task1/prototype:phase2/my-webscraper/scraper.py > /tmp/cits5501-task1-scraper.py
+```
+
+Ensure the required dependencies are installed:
+
+```bash
+uv pip install requests beautifulsoup4
+```
+
+Run the prototype against the local server:
+
+```bash
+python /tmp/cits5501-task1-scraper.py http://127.0.0.1:8000/policy/
+```
+
+### Observed Results
+
+The scraper identified one PDF link and downloaded the response.
+
+However, the server returned HTML content instead of a PDF.
+
+The observed output included:
+
+- HTTP status: 200 OK
+- Content-Type: text/html
+- Downloaded size: 234 bytes
+- Outcome: SUCCESS
+- Requests made: 2
+
+This demonstrates that the current prototype accepts the
+download based on its HTTP status without validating the
+actual document format.
+
+The test was performed locally without sending requests
+to the live policy website.
