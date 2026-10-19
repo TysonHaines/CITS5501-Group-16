@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 """
-CITS5501 Project Phase 2 -- starter code for the Task 1 minimal prototype.
+CITS5501 Project Phase 2 -- Task 1 minimal prototype (Group 16).
 
-What this starter already does:
+The prototype:
 
 - reads an optional start URL from the command line (defaults to the
   policy index page),
 - fetches that page via `fetch()`, which sets a timeout and a User-Agent,
   waits briefly between requests, and stops the program if it would exceed
   MAX_REQUESTS,
-- extracts every <a href="..."> link on the page and makes it absolute,
-- prints the links it found.
-
-What you need to write (look for "TODO"):
-
-- `is_policy_link()`: decide which links look like policy documents,
-- `describe_download()`: download one document and print its metadata,
-- the loop at the end of `main()` that picks 3-5 distinct documents
-  and calls `describe_download()` on each.
+- extracts every <a href="..."> link on the page, makes it absolute and
+  prints it,
+- keeps the links whose file extension marks them as policy documents
+  (`is_policy_link()`),
+- downloads up to MAX_DOCS distinct documents, printing the metadata for
+  each one (`describe_download()`); nothing is saved to disk.
 
 Run with:
 
@@ -98,8 +95,9 @@ def is_policy_link(url):
     Return True if `url` looks like it leads to a downloadable policy
     document (e.g. a PDF or office file), otherwise False.
 
-    TODO: implement this. Filtering by file extension is acceptable for
-    the prototype -- but note its limitations in your report.
+    Only the file extension of the URL's path is checked (case-insensitively),
+    against FILE_EXTENSIONS. The limitations of this are discussed in the
+    Task 1 report.
     """
     # this does not account for other possible file extensions unmentioned
     # along with any other links related to the policy
@@ -113,9 +111,11 @@ def describe_download(session, url):
     URL, HTTP status, declared content type, downloaded size, and
     (optionally) the first few bytes of the response body.
 
-    The downloaded data does not need to be saved to disk.
+    The response is streamed via `fetch()` and the downloaded data is
+    discarded, not saved to disk.
 
-    TODO: implement this, using `fetch()` to make the request.
+    Returns True if the download succeeded (2xx status and the whole body
+    was read), otherwise False.
     """
     print("==========METADATA==========")
     # url of policy
@@ -194,9 +194,6 @@ def main():
 
     policy_links = [link for link in links if is_policy_link(link)]
     print(f"{len(policy_links)} of these look like policy documents.")
-
-    # TODO: choose 3-5 *distinct* policy links and call describe_download()
-    # on each. Keep within MAX_REQUESTS (the index page already used one).
 
     unique_policy_links = list(
         dict.fromkeys(urldefrag(link)[0] for link in policy_links)
