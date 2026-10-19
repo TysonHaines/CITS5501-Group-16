@@ -1,38 +1,29 @@
 ---
 title: "CITS5501 Project Phase 2 -- Group 16"
-author: "Tyson Haines (23779585), Akshay Raghuwanshi (24991278), Khushi Sesetti (23823678), Kevin Tan (23789621), Celine Xu (24714078)"
 date: October 2026
-mainfont: "New Computer Modern"
+header-includes:
+  - |
+    ```{=typst}
+    #show figure: set block(breakable: true)
+    #show table: set par(justify: false)
+    ```
 ---
-
-<!--
-HOW TO USE THIS TEMPLATE
-
-- Text inside HTML comments like this one is guidance. Pandoc drops it from
-  the PDF, but delete it anyway before submitting.
-- Lines starting with "TODO:" are placeholders. Replace every one of them;
-  `grep -n TODO phase-2-report-group-16.md` should return nothing at submission.
-- The section headings follow the four task drafts on our branches. Check every
-  heading against the Phase 2 brief and add the brief's own requirement numbers
-  (e.g. "brief 3.2.3") where a section answers a specific requirement.
-- Numbering conventions, used everywhere in this report:
-    A001, A002, ...  assumptions (required format, Phase 1 brief 2.4)
-    L001, L002, ...  limitations of the Task 1 prototype
-    T001, T002, ...  Task 2 test cases
-    S1-S5            the five failure scenarios listed in the brief for Task 2
-    X001, X002, ...  Task 4 adversarial tests
-- Build the PDF with `make` in this directory (same pandoc + typst toolchain as Phase 1).
--->
 
 # 1. Introduction
 
-TODO: Two or three sentences on what Phase 2 asks for (a minimal scraper prototype, a test-suite design, fixtures and test doubles, and adversarial inputs) and how this report is organised.
+This report covers Phase 2 of the CITS5501/CITS3501 project, in which we build a minimal scraper for the UWA Policy Library (<https://uwa-policy.cits5501.arranstewart.io/policy/>) and plan how a production version of it should be tested. It addresses the four Phase 2 tasks:
 
-Our group repository is hosted at: [github.com/TysonHaines/CITS5501-Group-16](https://github.com/TysonHaines/CITS5501-Group-16).
+- **Section 3 (Task 1)** describes our minimal Python prototype, which identifies policy-document links on the index page, downloads five distinct documents and prints their metadata, together with its assumptions and limitations.
+- **Section 4 (Task 2)** proposes nine test cases covering the five failure scenarios given in the brief.
+- **Section 5 (Task 3)** discusses how fixtures and test doubles make those tests repeatable, reports our observations of the site's request limits, and explains our sample artifact: a local mock server that returns HTML for a PDF link.
+- **Section 6 (Task 4)** lists seven adversarial test ideas that challenge assumptions a scraper commonly makes about its environment.
 
-TODO: State the exact commit or tag the submission corresponds to (e.g. `main` at commit `abc1234`), so markers can reproduce what they read.
+The prototype code and its README (`phase2/`) and the Task 3 fixture code (`task3/`) are included in the accompanying zip file.
+
+Our group's  repository is hosted at: [github.com/TysonHaines/CITS5501-Group-16](https://github.com/TysonHaines/CITS5501-Group-16).
 
 # 2. Team members
+Group name: 404 Brain Not Found (Group 16).
 
 | Name                | Student number  | GitHub username   |
 |---------------------|-----------------|-------------------|
@@ -42,157 +33,116 @@ TODO: State the exact commit or tag the submission corresponds to (e.g. `main` a
 | Kevin Tan           | 23789621        | phattydumpling    |
 | Celine Xu           | 24714078        | 1031Celinela      |
 
-Group name: 404 Brain Not Found (Group 16).
-
 ## 2.1. Task allocation
 
-<!-- Keep this honest and specific; it supports the Group Contribution Factor and
-     shows the workflow promised in Phase 1 (feature branches + reviewed PRs). -->
-
-| Task | Lead | Contributors / reviewers | Branch(es) / PR(s) |
-|------|------|--------------------------|--------------------|
-| Task 1 – Prototype | TODO | TODO | `task1/prototype` |
-| Task 2 – Test suite design | TODO | TODO | `feature/task2-test-design` |
-| Task 3 – Fixtures and test doubles | TODO | TODO | `feature/task3-fixtures-test-doubles` |
-| Task 4 – Adversarial inputs | TODO | TODO | TODO |
-| Report integration and editing | TODO | TODO | `make-report` |
+| Task | Contributors |
+|------|--------------|
+| Task 1 – Prototype | Tyson/Khushi/Kevin |
+| Task 2 – Test suite design | Celine/Kevin |
+| Task 3 – Fixtures and test doubles | Akshay |
+| Task 4 – Adversarial inputs | Khushi |
+| Report integration/Final Review | Kevin/All Members |
 
 # 3. Task 1 – Prototype
 
-## 3.1. Purpose and implementation
+## 3.1. Purpose and Implementation
 
-<!-- Describe what the prototype does, in the order it does it: fetch index ->
-     extract links -> filter -> select N distinct documents -> fetch each ->
-     print metadata. Say explicitly what it does NOT do (e.g. no saving to disk,
-     no crawling beyond the index), citing the brief requirement for each. -->
+Our minimal prototype identifies and attempts to download a small selection of policy documents linked from the supplied UWA Policy Library index page.
 
-TODO: What the prototype does, step by step.
-
-TODO: How links are identified as policy documents, and how the 3–5 "distinct" documents are chosen (what "distinct" means in our implementation).
-
-TODO: The metadata printed for each download, as a list:
+In simple terms, it works by retrieving all hyper reference links starting from
+the index page. It then filters through these links by identifying which links
+contain a file extension `e.g. '.pdf', '.doc', etc.`, where those that do not
+contain any of the expected extensions are discarded. From there five 'distinct' policies are selected. The program will attempt to 'download' these
+policies via a stream (nothing is saved to disk as per Phase 2 brief
+requirement 3.2.3). The program will then display the metadata for this policy download request; including key information used to determine the outcome:
 
 - URL of the policy document
 - HTTP status and reason
 - Declared `Content-Type`
-- Downloaded size (actual bytes received, and the declared `Content-Length` if present)
-- First bytes of the response body
-- Outcome (`SUCCESS` / `FAILED`) and what each outcome means
+- Downloaded size
+- First 16 bytes of the file
+- Outcome of the download: `SUCCESS` or `FAILED`
 
-## 3.2. Request controls
+## 3.2. Request Controls
 
-<!-- The fetch() wrapper: User-Agent, timeout, delay, request cap. Be precise
-     about what each control does and does not guarantee (e.g. the timeout is
-     per connect/read, not a total deadline; redirects are not counted). -->
+All HTTP requests initiated explicitly by `scraper.py` pass through a common `fetch()` function.
 
-TODO: The controls applied by `fetch()` and their values.
+This applies:
 
-TODO: Requests made in a normal run (index + N documents) versus the cap.
+- A group-specific User-Agent identifying the course project.
+- A 10-second connection/read timeout.
+- A one-second pause between consecutive calls.
+- A limit of 20 calls to request wrapper per run.
 
-## 3.3. Running the prototype
+With the default selection of five documents, the normal workflow requires one index fetch and up to five document fetches. The prototype does not retry failed requests or select replacement documents when a selected download fails.
 
-TODO: The exact command(s) to run it on the marking environment (Ubuntu 22.04, `uv`), and where the README with full instructions lives (`phase2/my-webscraper/README.md`).
+These controls reduce the load placed on the website but they have limits. The timeout does not impose a ten-second deadline in the entire download. In addition, redirects followed automatically by requests can generate additional HTTP requests within a single `fetch()`. Those redirect requests are not individually counted or delayed by the wrapper.
 
-```bash
-# TODO: replace with the real command
-uv run --with-requirements requirements.txt scraper.py
-```
+## 3.3. Assumptions
 
-## 3.4. Sample output
+**A1 - Directly available links.**
+Policy documents are accessible through links in the index page’s initial HTML response. Recursive crawling and JavaScript execution are outside the prototype’s scope.
 
-<!-- One real, trimmed run against the live site, plus (ideally) one run that
-     shows a failure being reported, e.g. against the Task 3 mock server.
-     Show evidence; don't just describe it. -->
+**A2 - Extension-based identification.**
+A recognised URL extension is sufficient to identify a potential policy document. This is a discovery heuristic, not proof that the response contains a usable document.
 
-TODO: Paste a trimmed successful run.
+**A3 - URL-based document distinctness.**
+Resolved URLs are treated as distinct after removing fragments. The prototype does not compare document contents to identify identical files served under different URLs.
 
-```text
-TODO
-```
+**A4 - Small demonstration sample.**
+Selecting the first five candidate URLs is sufficient to demonstrate discovery and downloading; the prototype is not intended to retrieve the entire policy collection.
 
-TODO: Paste a run that shows a failure being reported (e.g. HTTP 404 or wrong content type).
+## 3.4. Limitations
 
-```text
-TODO
-```
+**L1 - Incomplete document discovery.**
+Extension filtering can miss documents served through extension-less endpoints, viewer pages or unsupported extensions such as `.rtf` and `.xlsx.` It can also select a URL ending in .pdf even when the response is not a policy document. Links generated by JavaScript are not discovered because the scraper only parses the returned HTML. The filter also does not check which website a link points to, so documents hosted elsewhere (the index links to several on www.uwa.edu.au) are also candidates. The brief does not require such links to be included; on the live index none fall within the first five selected documents, so in practice the prototype only downloads from the policy site.
 
-## 3.5. Assumptions
+**L2 - No document validation.**
+The prototype checks HTTP status and prints the declared content type and initial bytes, but does not validate PDF or office-file structure. Consequently, an HTTP 200 response containing an HTML error page or a corrupt PDF can still be reported as a successful download. ‘SUCCESS’ indicates a successful HTTP response whose body was read without a reported error, not proof that the document is usable. Tasks 2 and 4 propose tests that expose this distinction.
 
-<!-- Use the A001 format required by the Phase 1 brief (2.4): number, statement,
-     why it is reasonable. Every assumption here must also appear in the
-     register in Section 7. -->
+**L3 - No download-size limit.**
+The prototype reads documents in chunks without saving them to disk or loading the complete body into memory. However, it does not enforce a maximum download size. A very large response could therefore consume substantial bandwidth and processing time.
 
-**A001 – TODO: short name.**
-TODO: The assumption, and why it is reasonable.
+**L4 - Limited failure handling and network controls.**
+The prototype has no retry policy or overall download deadline. Its connection/read timeout does not guarantee that a continuously arriving response will finish within ten seconds. Index-fetch errors are not caught and an HTTP error response from the index can be parsed as though it were a normal page. Additionally, automatic redirects are not individually counted or delayed by `fetch()`, so its counter does not enforce a strict cap on all actual HTTP requests.
 
-**A002 – TODO: short name.**
-TODO: The assumption, and why it is reasonable.
-
-## 3.6. Limitations
-
-<!-- What the prototype knowingly does not handle. For each, say what the
-     consequence is and, where relevant, which Task 2 or Task 4 test would
-     expose it (e.g. "exposed by T008, X001"). -->
-
-**L001 – TODO: short name.**
-TODO: Limitation, consequence, and which test(s) would expose it.
-
-**L002 – TODO: short name.**
-TODO: Limitation, consequence, and which test(s) would expose it.
-
-# 4. Task 2 – Test suite design
+# 4. Task 2 – Design of Test Suite
 
 ## 4.1. Scope and expected behaviour
 
-<!-- State that the tests target a fully functional scraper, not the Task 1
-     prototype, and define what "correct" means (e.g. reporting a failure can be
-     correct; a 200 response alone is not a valid document). -->
+We propose nine black-box tests for a **fully functional policy-document scraper**, rather than for the minimal Task 1 prototype. The aim is predictable behaviour under faulty website structures, incomplete responses, network failures, HTTP errors and invalid documents. Correct behaviour may mean reporting a failure; recovery is not always possible. A failed document should not prevent other valid documents from being processed, whereas failure to retrieve the index must not be reported as a successful run with zero documents.
 
-TODO: What the test suite is designed for, and what counts as correct behaviour.
+Our proposed acceptance policy is to use a configurable timeout and **at most two attempts per URL** for timeouts or HTTP 503, with **no automatic retry for HTTP 404**, subject to an overall cap of **20 HTTP requests**. These are explicit test-design assumptions, **not claims about the current prototype**. A downloaded document is regarded as valid only if its content is consistent with the expected format and can be parsed; an HTTP 200 response alone is insufficient.
 
-## 4.2. Test-design assumptions and acceptance policy
+The reasonable response for each specified scenario is:
 
-<!-- Explicit, numbered policy the tests assert against, e.g. retry counts,
-     which statuses are retried, request cap. Record any of these as A00x in
-     Section 7. -->
+1. **Changed website structure:** Extract correct document links if supported; otherwise report that document discovery failed instead of silently claiming success.
+2. **Truncated HTML:** Process only reliably recoverable links without crashing or inventing URLs. Detect and report an incomplete HTTP transfer where it is observable; malformed markup alone does not always prove truncation.
+3. **Short or long timeout:** Allow bounded recovery from a temporary failure; report a persistent timeout and stop retrying within the configured limits.
+4. **HTTP 4xx or 5xx:** Record the actual error status; avoid retrying permanent 4xx responses (such as 404), bound retries for 5xx, and continue with independent links where feasible. A 429 rate-limit response may require separate handling of `Retry-After`.
+5. **Invalid policy document:** Distinguish a successful HTTP transfer from a usable PDF/office document; reject wrong-content and corrupt files with an explicit reason.
 
-TODO: The acceptance policy (timeouts, retry limits, which HTTP errors are retried, request cap), each linked to an assumption number.
+## 4.2. Test cases
 
-## 4.3. Expected behaviour per scenario
-
-<!-- One short paragraph per scenario from the brief. Use the brief's own
-     scenario names. -->
-
-1. **S1 – TODO: scenario name:** TODO: reasonable response.
-2. **S2 – TODO:** TODO.
-3. **S3 – TODO:** TODO.
-4. **S4 – TODO:** TODO.
-5. **S5 – TODO:** TODO.
-
-## 4.4. Test cases
-
-<!-- Arrange-Act-Assert. Each Assert must state concrete pass AND fail evidence
-     (an oracle), not "behaves correctly". -->
+Each test uses a controlled local index (e.g., `http://localhost:3000/policy/`) with predetermined responses, or a test double that supplies the stated failure. Valid PDF fixtures are independently confirmed to open in a reference PDF reader; the corrupt PDF fixture is independently confirmed to be rejected. **Act** for every case is to run the production scraper against the test index, except where the index fetch itself is being simulated. Assertions are checked using the reported outcomes, discovered URLs, request log and, where applicable, document-validation results. No live-site traffic is required.
 
 | Test ID / scenario | Arrange (fixture or environment) | Act | Assert (pass/fail evidence) |
-|---|---|---|---|
-| **T001 – S1: TODO** | TODO | TODO | **Pass:** TODO. **Fail:** TODO. |
-| **T002 – S2: TODO** | TODO | TODO | **Pass:** TODO. **Fail:** TODO. |
-| **T003 – S3: TODO** | TODO | TODO | **Pass:** TODO. **Fail:** TODO. |
+|:------|:------------|:------|:-------------|
+| **T001 – S1: Changed page structure** | Return HTTP 200 with an index whose policy URLs appear in `<button data-download="/docs/a.pdf">` rather than the expected `<a href>` elements. Include a valid `/docs/a.pdf` endpoint. | Scrape the altered index. | **Pass:** either discover and validate `a.pdf` using a supported fallback, **or** explicitly report document-discovery failure. **Fail:** quietly report successful completion with zero policies, invent links, or crash unexpectedly. |
+| **T002 – S2: Truncated HTML markup** | Return HTTP 200 with a complete `<a href="/docs/good.pdf">Good</a>` followed by a second, unfinished tag (`<a href="`) at end of body. `/docs/good.pdf` is valid. | Parse the incomplete index and attempt downloads. | **Pass:** recognise the complete `good.pdf` link, do not request a fabricated URL from the unfinished tag, and do not crash. **Fail:** attempt to download an incomplete/invalid link or treat malformed markup as a valid document link. |
+| **T003 – S2: Incomplete HTTP response** | The index endpoint announces `Content-Length: 1000` but sends only 200 bytes before closing the connection. | Request the index. | **Pass:** report an incomplete/failed transfer and do not treat the partial index as fully retrieved; any retries remain bounded. **Fail:** report successful index retrieval or continue as though the full body arrived. |
+| **T004 – S3: Temporary document timeout** | The index links to `/docs/recover.pdf`. A response double raises a timeout on its first GET, then returns HTTP 200 with a valid PDF on its second GET. | Download `recover.pdf`. | **Pass:** exactly two attempts, one successfully validated document, no duplicate result and no exceeded request cap. **Fail:** give up before the permitted retry, loop indefinitely or count the file twice. |
+| **T005 – S3: Persistent index timeout** | The index request times out on every attempt; the double records how many GETs were made. | Start a scraping run. | **Pass:** stop after at most two attempts and report that the index could not be retrieved. **Fail:** hang/retry without bound or report a successful empty scrape. |
+| **T006 – S4: HTTP 404 on one link** | A valid index links to `/docs/missing.pdf` (HTTP 404) and `/docs/good.pdf` (HTTP 200, valid PDF). | Process both links. | **Pass:** record `missing.pdf` as unavailable, make only one request to it, and still process `good.pdf` successfully. **Fail:** label the 404 body as a downloaded policy or abandon the entire run unnecessarily. |
+| **T007 – S4: Persistent HTTP 503** | The index links to `/docs/busy.pdf` (returns HTTP 503 on both attempts) and `/docs/good.pdf` (valid HTTP 200 PDF). Record all requests. | Process both links. | **Pass:** at most two requests to `busy.pdf`, report HTTP 503 as a document failure, and process `good.pdf`. **Fail:** retry indefinitely, accept the error body as a document or hide the error. |
+| **T008 – S5: HTML returned for a PDF URL** | `/docs/policy.pdf` returns HTTP 200 with `Content-Type: text/html` and an HTML error page, despite the `.pdf` URL suffix. | Download and validate the response. | **Pass:** reject it as a PDF and report a content/format mismatch. **Fail:** classify it as a usable PDF merely because the status is 200 or the URL ends in `.pdf`. |
+| **T009 – S5: Corrupt PDF with a valid-looking signature** | `/docs/broken.pdf` returns HTTP 200, `Content-Type: application/pdf`, and bytes beginning `%PDF-1.7`, but the remaining structure is malformed; a reference PDF parser rejects the fixture. | Download and validate the response. | **Pass:** mark the document invalid/corrupt and do not report successful document validation. **Fail:** accept it as usable solely because of its HTTP status, MIME type or initial `%PDF` signature. |
 
-## 4.5. Coverage summary
+## 4.3. Test rationale and limitations
 
-| Scenario | Test cases | Failure mechanisms distinguished |
-|---|---|---|
-| S1 | TODO | TODO |
-| S2 | TODO | TODO |
-| S3 | TODO | TODO |
-| S4 | TODO | TODO |
-| S5 | TODO | TODO |
+The nine cases cover all five required scenarios: **S1 (1 case), S2 (2), S3 (2), S4 (2), S5 (2)**. The paired cases intentionally distinguish different failure mechanisms: syntactically incomplete HTML versus a demonstrably incomplete network transfer (T002–T003), temporary versus persistent timeouts (T004–T005), client versus server HTTP errors (T006–T007), and misleading content types versus structurally corrupt documents (T008–T009). Observable outcomes, reference fixtures and request counts provide test oracles without depending on exact error-message wording.
 
-## 4.6. Rationale and limitations
-
-TODO: Why these cases were chosen, what the oracles are, and what the design does not cover. State clearly that these are proposed tests, not executed results.
+These are **proposed tests, not executed test results**. Their fixtures and response doubles can be implemented and reused independently of the live site. They define desirable production behaviour, and **do not assert that the intentionally minimal Task 1 prototype already passes them**.
 
 # 5. Task 3 – Fixtures and Test Doubles
 
@@ -225,9 +175,24 @@ We used `curl` to investigate whether the target policy website applies request 
 
 All six requests returned HTTP 200 with identical download sizes. Response times remained between approximately 0.50 and 0.60 seconds, and no redirects occurred.
 
-**Conclusion:** We did not observe any evidence of rate limiting during these six attempts. However, this does not necessarily mean the website has no restrictions, as limits might only apply when requests are made more frequently or in larger numbers.
+**Second test:** Since no limit appeared within six requests, on 19 October 2026 we repeated the test with ten download requests for the same PDF, again one second apart, and this time also recorded the response headers (using `curl -D -`).
 
-Another group member reported receiving HTTP 429 (Too Many Requests) after making more than six requests. This suggests that the website applies rate limits under certain conditions. However, the exact threshold and time window could not be established from our observations.
+| Request | Time     | HTTP Status | Content-Type    | Size (bytes) | X-Ratelimit-Remaining | Retry-After (s) |
+| ------- | -------- | ----------- | --------------- | ------------ | --------------------- | --------------- |
+| 1       | 19:09:12 | 200         | application/pdf | 301,201      | 2                     | 10              |
+| 2       | 19:09:14 | 200         | application/pdf | 301,201      | 2                     | 10              |
+| 3       | 19:09:16 | 200         | application/pdf | 301,201      | 1                     | 7               |
+| 4       | 19:09:17 | 200         | application/pdf | 301,201      | 1                     | 7               |
+| 5       | 19:09:19 | 200         | application/pdf | 301,201      | 0                     | 4               |
+| 6       | 19:09:20 | 200         | application/pdf | 301,201      | 0                     | 4               |
+| 7       | 19:09:21 | **429**     | text/html       | 40,740       | 0                     | 1               |
+| 8       | 19:09:23 | **429**     | text/html       | 40,740       | 0                     | 2               |
+| 9       | 19:09:24 | 200         | application/pdf | 301,201      | 2                     | 10              |
+| 10      | 19:09:25 | 200         | application/pdf | 301,201      | 2                     | 10              |
+
+Every response, including the successful ones, also carried the header `X-Ratelimit-Limit: 3`.
+
+**Conclusion:** The site does limit request rates. Requests 1–6 succeeded, but requests 7 and 8 were refused with HTTP 429 (Too Many Requests) and a 40,740-byte HTML error page in place of the PDF. The `Retry-After` header counted down to zero, and from request 9 the remaining count reset and downloads succeeded again. In practice the site therefore allows about six requests per window of roughly ten seconds. Although the header advertises a limit of 3, six requests succeeded because the remaining count fell by one only every two requests. Our first test made exactly six requests, which fitted within this allowance; that is why it showed no limit. The headers on those successful responses already reported the remaining allowance, but we had not recorded them.
 
 For a larger test suite, we would avoid repeatedly accessing the live website. Instead, we could use local fixtures and simulated server responses to test error handling, retry behaviour and rate limiting without generating unnecessary traffic.
 
@@ -313,42 +278,16 @@ Another limitation is that our demonstration focuses on incorrect content types 
 
 Despite these limitations, the implemented fixture provides a repeatable demonstration of an important weakness in document validation and can be reused when improving the scraper.
 
-# 6. Task 4 – Adversarial inputs
+# 6. Task 4 – Adversarial Inputs
 
-## 6.1. Approach
+Our phase 1 report identified assumptions about stable website structure, accurate content-type headers and predictable network behaviour. We extend those into adversarial test ideas below. These tests would use controlled local fixtures or servers rather than deliberately disrupting the live website. They are proposed tests, not observed results.
 
-<!-- Tie each adversarial input back to an assumption we made in Phase 1
-     (Q5, Q6, Q8) or in this report (A00x). State that inputs are served from
-     controlled local fixtures, never by disrupting the live site, and that these
-     are proposed tests, not observed results. -->
-
-TODO: How the adversarial inputs were derived from our Phase 1 report and the assumptions in this report, and how they would be run safely.
-
-## 6.2. Adversarial test cases
-
-| ID | Assumption challenged (source) | Input artifact or environment | Failure, and how it would be detected |
-|---|---|---|---|
-| **X001** | TODO (Phase 1 Q8 / A00x) | TODO | **Failure:** TODO. **Detection:** TODO. |
-| **X002** | TODO | TODO | **Failure:** TODO. **Detection:** TODO. |
-| **X003** | TODO | TODO | **Failure:** TODO. **Detection:** TODO. |
-
-## 6.3. Relationship to Tasks 1–3
-
-TODO: Which X tests the current prototype would fail (link to L00x), and which overlap with or extend Task 2 tests (link to T00x).
-
-# 7. Assumptions register
-
-<!-- Every A00x used anywhere in this report, in one place. -->
-
-| ID | Assumption | Why it is reasonable | Used in |
-|---|---|---|---|
-| A001 | TODO | TODO | Section 3.5 |
-| A002 | TODO | TODO | TODO |
-
-# 8. References
-
-<!-- Optional. Phase 1 brief recommends AMS short alpha-numeric style. Include
-     the brief, library docs, and any published source whose code we used (the
-     brief requires crediting it). Delete this section if unused. -->
-
-TODO: References, or delete this section.
+| Assumption challenged | Input artifact or environment | Failure and how it would be detected |
+|:--------|:-----------|:-------------|
+| A document can be trusted when its extension, HTTP status and declared content type look correct. | A local endpoint `/policy.pdf` returns HTTP 200 and `Content-Type: application/pdf`, but its body is an HTML error page. | **Failure:** The scraper reports the document as valid or usable without detecting the mismatch. **Detection:** Compare the scraper’s validation result against the known HTML fixture. Reporting a successful HTTP transfer alone is not a failure. |
+| A PDF signature proves that a file is a usable PDF. | Serve a file beginning with `%PDF-1.7` but containing invalid data and no usable PDF structure. Independently confirm that a reference PDF parser rejects the fixture. | **Failure:** The scraper declares the file valid based only on its initial bytes. **Detection:** Compare the scraper’s validation result with the reference parser’s rejection of the same file. This exposes the limitations of signature-only validation. |
+| One call to the HTTP wrapper corresponds to one HTTP request. | Configure a document endpoint to return a chain of about 25 HTTP redirects: long enough that following it would require more than 20 HTTP requests in total, including the index request, if the request cap were not enforced, but below the HTTP library's own redirect limit (30 for Python `requests`), so the test is not cut short by the library. | **Failure:** The scraper exceeds the request cap while its internal counter remains below the limit. **Detection:** Count every actual HTTP request, including redirect hops and retries, in the local server log and compare the total with the configured cap and scraper’s reported counter. |
+| Resolving relative links against the response URL is always sufficient. | Serve `/index.html` containing `<base href="/documents/">` and `<a href="policy.pdf">`. Configure `/documents/policy.pdf` to return a valid PDF and `/policy.pdf` to return HTTP 404. | **Failure:** The scraper requests `/policy.pdf` rather than `/documents/policy.pdf`. **Detection:** Compare the logged request path with the expected path determined by the HTML base URL. |
+| Every document is small enough to load into memory safely. | A local endpoint streams a large response body without a `Content-Length` header. Run the scraper with a predefined download-size or resource budget. | **Failure:** The scraper exceeds the budget, exhausts memory or terminates unexpectedly instead of reporting an oversized download. **Detection:** Monitor received bytes, peak memory usage and exit status against the predefined limits. |
+| A per-request timeout guarantees a bounded total download time. | A local endpoint sends small data chunks at intervals shorter than the configured read timeout but continues beyond a predefined overall time budget. For this test, the overall time budget is an additional test assumption. | **Failure:** The scraper continues beyond the overall time budget without stopping or reporting the slow download. **Detection:** Use an independent wall-clock watchdog to measure elapsed time. This tests whether the scraper incorrectly treats a read timeout as a total download deadline. |
+| Different link strings always identify different documents. | Serve an index at `/index.html` containing `/policy.pdf`, `./policy.pdf`, `/policy.pdf#page=1` and repeated copies of the same link. All resolve to the same document endpoint. These URLs refer to the same document resource, with the fragment not affecting the HTTP request. | **Failure:** The scraper downloads or counts the same document multiple times as distinct documents. **Detection:** Compare the local server’s request log and the scraper’s reported document count with the expected single unique document. |
