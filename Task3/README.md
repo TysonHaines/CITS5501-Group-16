@@ -32,7 +32,7 @@ Run these commands from the repository root:
 
 ```bash
 uv venv .venv
-source .venv/bin/activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 uv pip install -r Task3/requirements.txt
 ```
 
@@ -118,6 +118,7 @@ HTML instead of a valid PDF on demand.
 Using a local test double provides a controlled, repeatable
 environment without modifying the real website or depending
 on external network conditions.
+
 ## Integration Testing with Task 1
 
 We also tested the group's Task 1 prototype against the local
@@ -131,9 +132,10 @@ First, start the mock server from the repository root:
 python Task3/mock_server.py
 ```
 
-In another terminal, from the repository root, install the Task 1 dependencies:
+Open another terminal in the repository root. Activate the same virtual environment created in [Setup](#setup) (each new terminal needs this), then install the Task 1 dependencies:
 
 ```bash
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 uv pip install -r Task1/requirements.txt
 ```
 

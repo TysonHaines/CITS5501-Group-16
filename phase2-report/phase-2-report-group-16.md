@@ -92,6 +92,9 @@ Resolved URLs are treated as distinct after removing fragments. The prototype do
 **A4 - Small demonstration sample.**
 Selecting the first five candidate URLs is sufficient to demonstrate discovery and downloading; the prototype is not intended to retrieve the entire policy collection.
 
+**A5 - Execution environment.**
+The prototype is run on a machine with `python3` (version 3.10 or later, as required by the pinned `requests` library) and `uv` installed, as specified for the marking environment (Ubuntu 22.04). `uv` installs the pinned dependencies listed in `Task1/requirements.txt`. Where `uv` is unavailable, a standard Python virtual environment and `pip` can be used instead, as described in `Task1/README.md`.
+
 ## 3.4. Limitations
 
 **L1 - Incomplete document discovery.**
@@ -223,6 +226,8 @@ Although the requested URL ends in `.pdf`, the server deliberately returns HTTP 
 * `Task3/README.md` – Provides instructions for running the server and reproducing the demonstration.
 
 **How to run:**
+
+These instructions assume that `python3` (version 3.10 or later) and `uv` are installed, as specified for the marking environment (Ubuntu 22.04). `uv` is used to create the virtual environment and install pytest from `Task3/requirements.txt`, as described in `Task3/README.md`. The mock server itself uses only Python's standard library.
 
 From the repository root, activate the Python environment and execute:
 
