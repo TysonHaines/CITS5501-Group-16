@@ -1,0 +1,40 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Pytest cache
+.pytest_cache/
+
+# Type checking cache
+.mypy_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Local environment configuration
+.env
+.env.*
+
+# Linter cache
+.ruff_cache/
+
+# pandoc/typst binaries downloaded by the report Makefiles
+bin/
+
+# Submission zip (built from the repository at submission time)
+*.zip
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Office lock files (e.g. while a .docx is open in Word)
+~$*

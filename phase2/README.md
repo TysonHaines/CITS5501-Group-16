@@ -1,6 +1,6 @@
 # CITS5501 Project Phase 2 – Task 1 Prototype
 
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Status](https://img.shields.io/badge/status-prototype-orange)
 
 A minimal prototype whose objective is to **identify and "download" policy documents** from the UWA Policy Library index page.
@@ -53,7 +53,7 @@ To demonstrate that the scraper works, it prints useful progress information to 
 
 ## Requirements
 
-- **Python 3.8 or later**
+- **Python 3.10 or later** (required by the pinned version of `requests`; Ubuntu 22.04's `python3` is 3.10, and `uv` will download a suitable Python if needed)
 - **Packages listed in `requirements.txt`**, which ensures the dependencies and their versions are configured correctly.
 - **Network access to the policy site.** Access may be restricted depending on your network. You must either be able to reach the UWA Policy Library index page, or have a local copy of it.
 
@@ -61,11 +61,13 @@ To demonstrate that the scraper works, it prints useful progress information to 
 
 ## How to Run
 
-First, retrieve the scraper script and other essential files from our public GitHub repository:
+Run all commands below from the directory containing `scraper.py` and `requirements.txt` – that is, the `phase2/` directory of the submitted zip file.
+
+Alternatively, if you have access to our private GitHub repository, you can clone it and change into the same directory:
 
 ```bash
 git clone https://github.com/TysonHaines/CITS5501-Group-16.git
-cd CITS5501-Group-16
+cd CITS5501-Group-16/phase2
 ```
 
 ### Option 1: Using `uv`
