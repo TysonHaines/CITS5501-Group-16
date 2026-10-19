@@ -47,7 +47,7 @@ To demonstrate that the scraper works, it prints useful progress information to 
    - Outcome of the download: `SUCCESS` or `FAILED`
 
 > [!NOTE]
-> The number of documents is set by the `MAX_DOCS` variable (default `5`). We recommend not raising it when running against the live site: the site rate-limits requests (see Section 5.2 of our report), and in our tests any request beyond about six within roughly ten seconds was refused with HTTP 429.
+> The number of documents is set by the `MAX_DOCS` variable (default `5`). We recommend not raising it when running against the live site: the site rate-limits requests (see Section 5.2 of our report), and in our tests requests beyond the first five or six within roughly ten seconds were refused with HTTP 429.
 
 ---
 
@@ -147,7 +147,7 @@ Users of this scraper are expected to act respectfully and without malicious int
 | `DELAY_SECONDS`   | `1.0`   | Pause between consecutive requests.                                      |
 
 > [!TIP]
-> A normal run makes 6 requests through `fetch()` (1 index page + 5 downloads), well within `MAX_REQUESTS`. Note that redirects followed automatically by `requests` are not counted by `fetch()`, so the actual number of HTTP requests can be higher. Six requests one second apart also just fits within the live site's own rate limit, so raising `MAX_DOCS` is likely to produce HTTP 429 responses.
+> A normal run makes 6 requests through `fetch()` (1 index page + 5 downloads), well within `MAX_REQUESTS`. Note that redirects followed automatically by `requests` are not counted by `fetch()`, so the actual number of HTTP requests can be higher. A normal run is also at the edge of the live site's own rate limit: in one of our runs the last document received HTTP 429 and was reported as `FAILED (HTTP 429)`. Raising `MAX_DOCS` makes such failures more likely.
 
 ---
 
