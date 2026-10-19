@@ -31,6 +31,8 @@ All six requests returned HTTP 200 with identical download sizes. Response times
 
 **Conclusion:** We did not observe any evidence of rate limiting during these six attempts. However, this does not necessarily mean the website has no restrictions, as limits might only apply when requests are made more frequently or in larger numbers.
 
+Another group member reported receiving HTTP 429 (Too Many Requests) after making more than six requests. This suggests that the website applies rate limits under certain conditions. However, the exact threshold and time window could not be established from our observations.
+
 For a larger test suite, we would avoid repeatedly accessing the live website. Instead, we could use local fixtures and simulated server responses to test error handling, retry behaviour and rate limiting without generating unnecessary traffic.
 
 ## 5.3. Using Test Doubles to Simulate Failures
