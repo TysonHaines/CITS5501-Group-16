@@ -40,7 +40,7 @@ uv pip install pytest
 From the repository root, run:
 
 ```bash
-python task3/mock_server.py
+python Task3/mock_server.py
 ```
 
 The server starts at:
@@ -71,7 +71,7 @@ Press Ctrl+C to stop the server.
 From the repository root, run:
 
 ```bash
-python -m pytest -v task3/test_mock_server.py
+python -m pytest -v Task3/test_mock_server.py
 ```
 
 The tests automatically start and stop their own local HTTP servers.
@@ -127,19 +127,19 @@ mock server to demonstrate how it handles an invalid PDF response.
 First, start the mock server from the repository root:
 
 ```bash
-python task3/mock_server.py
+python Task3/mock_server.py
 ```
 
 In another terminal, from the repository root, install the Task 1 dependencies:
 
 ```bash
-uv pip install -r phase2/requirements.txt
+uv pip install -r Task1/requirements.txt
 ```
 
 Run the scraper against the local mock server:
 
 ```bash
-python phase2/scraper.py http://127.0.0.1:8000/policy/
+python Task1/scraper.py http://127.0.0.1:8000/policy/
 ```
 
 ### Observed Results

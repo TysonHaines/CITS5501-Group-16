@@ -61,13 +61,13 @@ To demonstrate that the scraper works, it prints useful progress information to 
 
 ## How to Run
 
-Run all commands below from the directory containing `scraper.py` and `requirements.txt` – that is, the `phase2/` directory of the submitted zip file.
+Run all commands below from the directory containing `scraper.py` and `requirements.txt` – that is, the `Task1/` directory of the submitted zip file.
 
 Alternatively, if you have access to our private GitHub repository, you can clone it and change into the same directory:
 
 ```bash
 git clone https://github.com/TysonHaines/CITS5501-Group-16.git
-cd CITS5501-Group-16/phase2
+cd CITS5501-Group-16/Task1
 ```
 
 ### Option 1: Using `uv`

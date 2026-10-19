@@ -18,7 +18,7 @@ This report covers Phase 2 of the CITS5501/CITS3501 project, in which we build a
 - **Section 5 (Task 3)** discusses how fixtures and test doubles make those tests repeatable, reports our observations of the site's request limits, and explains our sample artifact: a local mock server that returns HTML for a PDF link.
 - **Section 6 (Task 4)** lists seven adversarial test ideas that challenge assumptions a scraper commonly makes about its environment.
 
-The prototype code and its README (`phase2/`) and the Task 3 fixture code (`task3/`) are included in the accompanying zip file.
+The prototype code and its README (`Task1/`) and the Task 3 fixture code (`Task3/`) are included in the accompanying zip file.
 
 Our group's  repository is hosted at: [github.com/TysonHaines/CITS5501-Group-16](https://github.com/TysonHaines/CITS5501-Group-16).
 
@@ -218,22 +218,22 @@ Although the requested URL ends in `.pdf`, the server deliberately returns HTTP 
 
 **Files:**
 
-* `task3/mock_server.py` – Implements the local HTTP server and invalid PDF response.
-* `task3/test_mock_server.py` – Contains three automated tests using pytest.
-* `task3/README.md` – Provides instructions for running the server and reproducing the demonstration.
+* `Task3/mock_server.py` – Implements the local HTTP server and invalid PDF response.
+* `Task3/test_mock_server.py` – Contains three automated tests using pytest.
+* `Task3/README.md` – Provides instructions for running the server and reproducing the demonstration.
 
 **How to run:**
 
 From the repository root, activate the Python environment and execute:
 
 ```bash
-python -m pytest -v task3/test_mock_server.py
+python -m pytest -v Task3/test_mock_server.py
 ```
 
 To run the mock server manually:
 
 ```bash
-python task3/mock_server.py
+python Task3/mock_server.py
 ```
 
 The mock policy index is then available at `http://127.0.0.1:8000/policy/`.
