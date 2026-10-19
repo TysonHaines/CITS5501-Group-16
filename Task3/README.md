@@ -18,11 +18,12 @@ file extension.
   built-in HTTP server.
 - `test_mock_server.py` – Contains automated pytest tests.
 - `README.md` – Instructions for running the demonstration.
+- `requirements.txt` – Test dependencies (pytest).
 
 ## Requirements
 
 - Python 3.10 or later
-- pytest
+- pytest (version pinned in `requirements.txt`)
 - uv (recommended for dependency management)
 
 ## Setup
@@ -32,7 +33,7 @@ Run these commands from the repository root:
 ```bash
 uv venv .venv
 source .venv/bin/activate
-uv pip install pytest
+uv pip install -r Task3/requirements.txt
 ```
 
 ## Running the Mock Server
