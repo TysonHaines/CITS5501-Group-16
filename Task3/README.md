@@ -18,11 +18,12 @@ file extension.
   built-in HTTP server.
 - `test_mock_server.py` – Contains automated pytest tests.
 - `README.md` – Instructions for running the demonstration.
+- `requirements.txt` – Test dependencies (pytest).
 
 ## Requirements
 
 - Python 3.10 or later
-- pytest
+- pytest (version pinned in `requirements.txt`)
 - uv (recommended for dependency management)
 
 ## Setup
@@ -31,8 +32,8 @@ Run these commands from the repository root:
 
 ```bash
 uv venv .venv
-source .venv/bin/activate
-uv pip install pytest
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+uv pip install -r Task3/requirements.txt
 ```
 
 ## Running the Mock Server
@@ -40,7 +41,7 @@ uv pip install pytest
 From the repository root, run:
 
 ```bash
-python task3/mock_server.py
+python Task3/mock_server.py
 ```
 
 The server starts at:
@@ -71,7 +72,7 @@ Press Ctrl+C to stop the server.
 From the repository root, run:
 
 ```bash
-python -m pytest -v task3/test_mock_server.py
+python -m pytest -v Task3/test_mock_server.py
 ```
 
 The tests automatically start and stop their own local HTTP servers.
@@ -117,6 +118,7 @@ HTML instead of a valid PDF on demand.
 Using a local test double provides a controlled, repeatable
 environment without modifying the real website or depending
 on external network conditions.
+
 ## Integration Testing with Task 1
 
 We also tested the group's Task 1 prototype against the local
@@ -127,19 +129,20 @@ mock server to demonstrate how it handles an invalid PDF response.
 First, start the mock server from the repository root:
 
 ```bash
-python task3/mock_server.py
+python Task3/mock_server.py
 ```
 
-In another terminal, from the repository root, install the Task 1 dependencies:
+Open another terminal in the repository root. Activate the same virtual environment created in [Setup](#setup) (each new terminal needs this), then install the Task 1 dependencies:
 
 ```bash
-uv pip install -r phase2/requirements.txt
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+uv pip install -r Task1/requirements.txt
 ```
 
 Run the scraper against the local mock server:
 
 ```bash
-python phase2/scraper.py http://127.0.0.1:8000/policy/
+python Task1/scraper.py http://127.0.0.1:8000/policy/
 ```
 
 ### Observed Results

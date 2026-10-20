@@ -11,7 +11,7 @@ from urllib.request import urlopen
 
 import pytest
 
-from task3.mock_server import MockPolicyHandler
+from Task3.mock_server import MockPolicyHandler
 
 
 @pytest.fixture(name="mock_server")

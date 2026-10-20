@@ -23,6 +23,9 @@ htmlcov/
 # Linter cache
 .ruff_cache/
 
+# Task 1 drafts and starter-code copies, not part of the submitted prototype
+Task1/my-webscraper/
+
 # pandoc/typst binaries downloaded by the report Makefiles
 bin/
 
